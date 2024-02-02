@@ -92,6 +92,10 @@ class MouseHandler:
         if pygame.mouse.get_pressed()[0]:
             start, end = self._get_placement_cords(x, y)
 
+            box.place_grains(start, end, current_type, keep=True)
+        if pygame.mouse.get_pressed()[2]:
+            start, end = self._get_placement_cords(x, y)
+
             box.place_grains(start, end, current_type)
 
 

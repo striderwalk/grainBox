@@ -163,9 +163,16 @@ class BoxSimulator:
 
         self.chunks[int((pos[0] / CHUNK_SIZE)), int((pos[1] / CHUNK_SIZE))] = 5
 
-    def place_grains(self, start_pos, end_pos, grain):
-        self.grid[start_pos[0] : end_pos[0], start_pos[1] : end_pos[1]] = grain
+    def place_grains(self, start_pos, end_pos, grain, keep=False):
+        if not keep:
+            self.grid[start_pos[0] : end_pos[0], start_pos[1] : end_pos[1]] = grain
 
+        for i in range(start_pos[0], end_pos[0]):
+            for j in range(start_pos[1], end_pos[1]):
+                if GRAIN_DATA[self.grid[i, j]][2] < GRAIN_DATA[grain][2]:
+                    self.grid[i, j] = grain
+
+        # Turn on the chunks
         start_chunk = (start_pos[0] / CHUNK_SIZE), (start_pos[1] / CHUNK_SIZE)
         start_chunk = int(start_chunk[0]), int(start_chunk[1])
 
@@ -246,8 +253,8 @@ class Box:
     def place_grain(self, pos, grain):
         self.simulatior.place_grains(pos, grain)
 
-    def place_grains(self, start_pos, end_pos, grain):
-        self.simulatior.place_grains(start_pos, end_pos, grain)
+    def place_grains(self, start_pos, end_pos, grain, **kwargs):
+        self.simulatior.place_grains(start_pos, end_pos, grain, **kwargs)
 
     def reset(self):
         self.simulatior = BoxSimulator()
