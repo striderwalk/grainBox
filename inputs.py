@@ -105,7 +105,6 @@ class Selection:
 
     def next(self):
         self.index = (self.index + 1) % len(self.grains)
-        print(f"{self.current_selection_name} selected")
 
     @property
     def current_selection_name(self):
