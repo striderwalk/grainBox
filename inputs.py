@@ -30,8 +30,8 @@ class MouseHandler:
         box_size = int((self.cursor_size - 1) / 2)
         topleft_x = max((x - box_size), 1)
         topleft_y = max((y - box_size), 1)
-        bottomright_x = min(x + box_size, GRID_WIDTH + 1)
-        bottomright_y = min(y + box_size, GRID_HEIGHT + 1)
+        bottomright_x = min(x + box_size + 1, GRID_WIDTH + 1)
+        bottomright_y = min(y + box_size + 1, GRID_HEIGHT + 1)
         return (topleft_x, topleft_y), (bottomright_x, bottomright_y)
 
     def _get_box_cords(self, x: float, y: float) -> tuple:
