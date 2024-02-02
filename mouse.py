@@ -64,29 +64,29 @@ class Mouse_hander:
 
         box_size = int((self.cursor_size - 1) / 2)
 
-        if x < 0 or y < 0 or x > GRID_SIZE or y > GRID_SIZE:
+        if x < 0 or y < 0 or x > GRID_WIDTH or y > GRID_HEIGHT:
+            return
+
+        if not (x != 0 or y != 0 or x != GRID_WIDTH + 2 or y != GRID_HEIGHT + 2):
             return
 
         if pygame.mouse.get_pressed()[0]:
-            if x != 0 or y != 0 or x != GRID_SIZE + 2 or y != GRID_SIZE + 2:
-                box.place_grains(
-                    (x - box_size, y - box_size),
-                    (x + box_size + 1, y + box_size + 1),
-                    "san",
-                )
+            box.place_grains(
+                (x - box_size, y - box_size),
+                (x + box_size + 1, y + box_size + 1),
+                "san",
+            )
 
         elif pygame.mouse.get_pressed()[2]:
-            if x != 0 or y != 0 or x != GRID_SIZE + 2 or y != GRID_SIZE + 2:
-                box.place_grains(
-                    (x - box_size, y - box_size),
-                    (x + box_size + 1, y + box_size + 1),
-                    "wat",
-                )
+            box.place_grains(
+                (x - box_size, y - box_size),
+                (x + box_size + 1, y + box_size + 1),
+                "wat",
+            )
 
         elif pygame.mouse.get_pressed()[1]:
-            if x != 0 or y != 0 or x != GRID_SIZE + 2 or y != GRID_SIZE + 2:
-                box.place_grains(
-                    (x - box_size, y - box_size),
-                    (x + box_size + 1, y + box_size + 1),
-                    "stm",
-                )
+            box.place_grains(
+                (x - box_size, y - box_size),
+                (x + box_size + 1, y + box_size + 1),
+                "air",
+            )

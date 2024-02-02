@@ -12,11 +12,15 @@ from grains import GRAIN_DATA
 class BoxSimulator:
     def __init__(self):
         self.grid = np.array(
-            [["air" for _ in range(GRID_SIZE + 2)] for _ in range(GRID_SIZE + 2)]
+            [["wat" for _ in range(GRID_HEIGHT + 2)] for _ in range(GRID_WIDTH + 2)]
         )
-        chucks = int(np.ceil(GRID_SIZE / CHUNK_SIZE))
+        chucks_width = int(np.ceil(GRID_WIDTH / CHUNK_SIZE))
+        chucks_height = int(np.ceil(GRID_HEIGHT / CHUNK_SIZE))
 
-        self.chunks = np.array(([[2 for _ in range(chucks)] for _ in range(chucks)]))
+        self.chunks = np.array(
+            ([[2 for _ in range(chucks_height)] for _ in range(chucks_width)])
+        )
+        print(self.chunks.shape, self.grid.shape)
 
     def check_chunks(self):
         for i in range(len(self.chunks)):
@@ -25,7 +29,7 @@ class BoxSimulator:
                     i * CHUNK_SIZE
                     + 1 : min(i * CHUNK_SIZE + CHUNK_SIZE + 1, len(self.grid) - 1),
                     j * CHUNK_SIZE
-                    + 1 : min(j * CHUNK_SIZE + CHUNK_SIZE + 1, len(self.grid) - 1),
+                    + 1 : min(j * CHUNK_SIZE + CHUNK_SIZE + 1, len(self.grid[0]) - 1),
                 ]
 
                 if (chunk == "air").all():
@@ -43,7 +47,7 @@ class BoxSimulator:
                 start_i = max(1, i_chunk * CHUNK_SIZE - 1)
                 end_i = min(start_i + CHUNK_SIZE + 1, len(self.grid) - 1)
                 start_j = max(1, j_chunk * CHUNK_SIZE - 1)
-                end_j = min(start_j + CHUNK_SIZE + 1, len(self.grid) - 1)
+                end_j = min(start_j + CHUNK_SIZE + 1, len(self.grid[0]) - 1)
 
                 for i in range(start_i, end_i):
                     for j in range(start_j, end_j):
@@ -95,7 +99,7 @@ class BoxSimulator:
 
             if new_i < 1 or new_i > len(self.grid) - 2:
                 return False
-            if new_j < 1 or new_j > len(self.grid) - 2:
+            if new_j < 1 or new_j > len(self.grid[0]) - 2:
                 return False
 
             next_grid[new_i, new_j] = next_grid[i, j]
@@ -108,22 +112,21 @@ class BoxSimulator:
     def update_grid(self):
         next_grid = deepcopy(self.grid)
 
+        # Iterate over each chunk -------------------------------->
         for i_chunk in range(len(self.chunks)):
             for j_chunk in range(len(self.chunks[i_chunk])):
+
                 if self.chunks[i_chunk, j_chunk] == 0:
                     continue
 
+                # find real range chunk
                 start_i = max(1, i_chunk * CHUNK_SIZE - 1)
                 end_i = min(start_i + CHUNK_SIZE + 1, len(self.grid) - 1)
 
                 start_j = max(1, j_chunk * CHUNK_SIZE - 1)
-                end_j = min(start_j + CHUNK_SIZE + 1, len(self.grid) - 1)
+                end_j = min(start_j + CHUNK_SIZE + 1, len(self.grid[0]) - 1)
 
                 # pick the direction to iterate
-                change = False
-                # for i in range(start_i, end_i):
-                #     for j in range(start_j, end_j):
-                #         change = self.update_item(i, j, next_grid) or change
                 i_range = (
                     range(start_i, end_i)
                     if random.random() < 0.5
@@ -136,15 +139,20 @@ class BoxSimulator:
                     else range(end_j - 1, start_j - 1, -1)
                 )
 
+                change = False
                 for i in i_range:
                     for j in j_range:
+
                         change = self.update_item(i, j, next_grid) or change
 
-                if not change:
+                if not change and self.chunks[i_chunk, j_chunk] > 0:
                     self.chunks[i_chunk, j_chunk] -= 1
-                    self.chunks[i_chunk, j_chunk] = max(
-                        self.chunks[i_chunk, j_chunk], 0
-                    )
+                else:
+                    if i_chunk > 0:
+                        self.chunks[i_chunk - 1, j_chunk] = 5
+                    if i_chunk < len(self.chunks) - 1:
+
+                        self.chunks[i_chunk + 1, j_chunk] = 5
 
         self.grid = next_grid
 
@@ -156,27 +164,33 @@ class BoxSimulator:
     def place_grains(self, start_pos, end_pos, grain):
         self.grid[start_pos[0] : end_pos[0], start_pos[1] : end_pos[1]] = grain
 
-        self.chunks[
-            int((start_pos[0] / CHUNK_SIZE)), int((start_pos[1] / CHUNK_SIZE))
-        ] = 5
-        self.chunks[int((end_pos[0] / CHUNK_SIZE)), int((end_pos[1] / CHUNK_SIZE))] = 5
+        start_chunk = (start_pos[0] / CHUNK_SIZE), (start_pos[1] / CHUNK_SIZE)
+        start_chunk = int(start_chunk[0]), int(start_chunk[1])
 
-    def reset(self):
-        self.grid = np.array(
-            [["air" for _ in range(GRID_SIZE + 2)] for _ in range(GRID_SIZE + 2)]
-        )
+        end_chunk = (end_pos[0] / CHUNK_SIZE), (end_pos[1] / CHUNK_SIZE)
+        end_chunk = int(end_chunk[0]), int(end_chunk[1])
+        self.chunks[start_chunk] = 5
+        self.chunks[end_chunk] = 5
+
+        self.chunks[
+            start_chunk[0] - 1 : end_chunk[0] + 2, start_chunk[1] - 1 : end_chunk[1] + 2
+        ] = 5
 
 
 class Box:
     def __init__(self) -> None:
         self.simulatior = BoxSimulator()
-        self.surface = pygame.Surface((WIDTH, HEIGHT), flags=pygame.SRCALPHA)
+        self.surface = pygame.Surface(
+            (GRID_WIDTH * GRAIN_SIZE, GRID_HEIGHT * GRAIN_SIZE), flags=pygame.SRCALPHA
+        )
 
-        self.noise = pygame.Surface((WIDTH, HEIGHT)).convert()  # flags=pygame.SRCALPHA)
-        self.noise.set_alpha(100)
-        for i in range(GRID_SIZE):
-            for j in range(GRID_SIZE):
-                number = random.randint(0, 50)
+        self.noise = pygame.Surface(
+            ((GRID_WIDTH * GRAIN_SIZE, GRID_HEIGHT * GRAIN_SIZE))
+        ).convert()  # flags=pygame.SRCALPHA)
+        self.noise.set_alpha(50)
+        for i in range(GRID_WIDTH):
+            for j in range(GRID_HEIGHT):
+                number = random.randint(25, 100)
                 pygame.draw.rect(
                     self.noise,
                     (number, number, number),
@@ -185,6 +199,7 @@ class Box:
 
     def update(self, win):
         self.simulatior.update_grid()
+
         self.simulatior.draw(self.surface)
         win.blit(self.surface, (0, 0))
         win.blit(self.noise, (0, 0))
@@ -201,7 +216,7 @@ class Box:
                 text_surface = my_font.render(
                     str(self.simulatior.chunks[i, j]), False, WHITE
                 )
-                chunk_size = GRAIN_SIZE * CHUNK_SIZE
+                chunk_size = CHUNK_SIZE * GRAIN_SIZE
                 win.blit(text_surface, ((i) * chunk_size, (j) * chunk_size))
                 pygame.draw.rect(
                     win,

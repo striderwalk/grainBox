@@ -17,14 +17,12 @@ def main():
     box = Box()
     mouse_handler = Mouse_hander()
 
-    # for i in range(1, GRID_SIZE):
-    #     for j in range(1, GRID_SIZE):
-    #         box.place_grain((i, j), random.choice(["wat", "san", "stn", "stm"]))
+    box.place_grains((10, 50), (30, 74), "air")
 
     # main loop -------------------------------->
 
-    # for i in range(1000):
-    while True:
+    for i in range(1000):
+        # while True:
         box.update(win)
         mouse_handler.update(win, box)
 
@@ -47,7 +45,7 @@ def main():
 
         # update frame
         pygame.display.flip()
-        win.fill(BLACK)
+        win.fill(WHITE)
         clock.tick(FPS)
         cur_fps = clock.get_fps()
         fps_text = f"FPS: {cur_fps:.2f}"
