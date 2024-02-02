@@ -105,7 +105,11 @@ class Selection:
 
     def next(self):
         self.index = (self.index + 1) % len(self.grains)
-        print(f"{self.grain_to_name[self.current_selection]} selected")
+        print(f"{self.current_selection_name} selected")
+
+    @property
+    def current_selection_name(self):
+        return self.grain_to_name[self.current_selection]
 
     @property
     def current_selection(self):
@@ -118,7 +122,11 @@ class InputHandler:
         self.selection = Selection()
 
     def update(self, win, box):
-
+        my_font = pygame.font.SysFont("Helvetica", 30)
+        win.blit(
+            my_font.render(self.selection.current_selection_name, False, WHITE),
+            (10, 10),
+        )
         self.mouse.update(win, box, self.selection.current_selection)
         # handle events -------------------------------->
         for event in pygame.event.get():

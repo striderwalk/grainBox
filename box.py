@@ -175,8 +175,8 @@ class BoxSimulator:
         self.chunks[end_chunk] = 1
 
         self.chunks[
-            max(start_chunk[0] - 1, 0) : min(end_chunk[0] + 2, len(self.chunks) - 1),
-            max(start_chunk[1] - 1, 0) : min(end_chunk[1] + 2, len(self.chunks) - 1),
+            max(start_chunk[0] - 1, 0) : min(end_chunk[0] + 2, len(self.chunks)),
+            max(start_chunk[1] - 1, 0) : min(end_chunk[1] + 2, len(self.chunks)),
         ] = 5
 
 
