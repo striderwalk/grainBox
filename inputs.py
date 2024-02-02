@@ -9,7 +9,6 @@ class MouseHandler:
     def __init__(self):
         self.cursor_size = 1  # x by x square centered around the mouse cursor
 
-        pygame.mouse.set_visible(False)
         self.current_type = None
 
     def scale_cursor(self, direction):
@@ -27,26 +26,46 @@ class MouseHandler:
 
         return x, y
 
+    def _get_placement_cords(self, x, y):
+        box_size = int((self.cursor_size - 1) / 2)
+        topleft_x = max((x - box_size), 1)
+        topleft_y = max((y - box_size), 1)
+        bottomright_x = min(x + box_size, GRID_WIDTH + 1)
+        bottomright_y = min(y + box_size, GRID_HEIGHT + 1)
+        return (topleft_x, topleft_y), (bottomright_x, bottomright_y)
+
     def _get_box_cords(self, x: float, y: float) -> tuple:
         # find topleft
         box_size = int((self.cursor_size - 1) / 2)
-        topleft_x = (x - box_size) * GRAIN_SIZE
-        topleft_y = (y - box_size) * GRAIN_SIZE
+        topleft_x = max((x - box_size) * GRAIN_SIZE, 1)
+        topleft_y = max((y - box_size) * GRAIN_SIZE, 1)
 
-        box_cords = (
-            topleft_x,
-            topleft_y,
-            self.cursor_size * GRAIN_SIZE,
-            self.cursor_size * GRAIN_SIZE,
+        size = self.cursor_size * GRAIN_SIZE
+
+        width = (
+            size
+            if topleft_x + size < GRAIN_SIZE * GRID_WIDTH
+            else -topleft_x + GRAIN_SIZE * GRID_WIDTH - 2
         )
+        height = (
+            size
+            if topleft_y + size < GRAIN_SIZE * GRID_HEIGHT
+            else -topleft_y + GRAIN_SIZE * GRID_HEIGHT - 2
+        )
+        box_cords = (topleft_x, topleft_y, width, height)
         return box_cords
 
     def draw_mouse(self, win):
-        if not pygame.mouse.get_focused():
-            return
 
         x, y = self.get_position()
         x, y = x + 1, y + 1
+        if x < 0 or y < 0 or x > GRID_WIDTH or y > GRID_HEIGHT:
+            pygame.mouse.set_visible(True)
+            return
+        else:
+            pygame.mouse.set_visible(False)
+        if not pygame.mouse.get_focused():
+            return
 
         # draw centre
 
@@ -67,33 +86,30 @@ class MouseHandler:
         x, y = self.get_position()
         x, y = x + 2, y + 2
 
-        box_size = int((self.cursor_size - 1) / 2)
-
         if x < 0 or y < 0 or x > GRID_WIDTH or y > GRID_HEIGHT:
             return
 
-        if not (x != 0 or y != 0 or x != GRID_WIDTH + 2 or y != GRID_HEIGHT + 2):
-            return
-
         if pygame.mouse.get_pressed()[0]:
-            start = max(x - box_size, 0), min(y - box_size, GRID_HEIGHT - 1)
-            end = max(x + box_size + 1, 0), min(y + box_size + 1, GRID_HEIGHT - 1)
+            start, end = self._get_placement_cords(x, y)
 
             box.place_grains(start, end, current_type)
 
 
 class Selection:
     def __init__(self):
-        self.options = list(GRAINS)
+
+        self.grains = list(GRAINS.values())
+        self.grain_to_name = {value: key for key, value in GRAINS.items()}
+
         self.index = 0
 
     def next(self):
-        self.index = (self.index + 1) % len(GRAINS)
-        print(self.current_selection)
+        self.index = (self.index + 1) % len(self.grains)
+        print(f"{self.grain_to_name[self.current_selection]} selected")
 
     @property
     def current_selection(self):
-        return self.options[self.index]
+        return self.grains[self.index]
 
 
 class InputHandler:
@@ -113,7 +129,8 @@ class InputHandler:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r:
                     box.reset()
-
+                elif event.key == pygame.K_ESCAPE:
+                    return True
                 elif event.key == pygame.K_f:
                     box.check_chunks()
                 elif event.key == pygame.K_SPACE:

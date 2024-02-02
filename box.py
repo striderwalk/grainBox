@@ -6,13 +6,16 @@ import numpy as np
 import pygame
 
 from consts import *
-from grains import GRAIN_DATA
+from grains import GRAIN_DATA, GRAINS
 
 
 class BoxSimulator:
     def __init__(self):
         self.grid = np.array(
-            [["wat" for _ in range(GRID_HEIGHT + 2)] for _ in range(GRID_WIDTH + 2)]
+            [
+                [GRAINS["water"] for _ in range(GRID_HEIGHT + 2)]
+                for _ in range(GRID_WIDTH + 2)
+            ]
         )
         chucks_width = int(np.ceil(GRID_WIDTH / CHUNK_SIZE))
         chucks_height = int(np.ceil(GRID_HEIGHT / CHUNK_SIZE))
@@ -20,7 +23,6 @@ class BoxSimulator:
         self.chunks = np.array(
             ([[2 for _ in range(chucks_height)] for _ in range(chucks_width)])
         )
-        print(self.chunks.shape, self.grid.shape)
 
     def check_chunks(self):
         for i in range(len(self.chunks)):
@@ -32,7 +34,7 @@ class BoxSimulator:
                     + 1 : min(j * CHUNK_SIZE + CHUNK_SIZE + 1, len(self.grid[0]) - 1),
                 ]
 
-                if (chunk == "air").all():
+                if (chunk == GRAINS["air"]).all():
                     self.chunks[i, j] = 0
 
                 else:
@@ -63,7 +65,7 @@ class BoxSimulator:
                         )
 
     def update_item(self, i, j, next_grid):
-        if self.grid[i, j] == "air":
+        if self.grid[i, j] == GRAINS["air"]:
             return
 
         # this = grid[i, j]
@@ -169,11 +171,12 @@ class BoxSimulator:
 
         end_chunk = (end_pos[0] / CHUNK_SIZE), (end_pos[1] / CHUNK_SIZE)
         end_chunk = int(end_chunk[0]), int(end_chunk[1])
-        self.chunks[start_chunk] = 5
-        self.chunks[end_chunk] = 5
+        self.chunks[start_chunk] = 1
+        self.chunks[end_chunk] = 1
 
         self.chunks[
-            start_chunk[0] - 1 : end_chunk[0] + 2, start_chunk[1] - 1 : end_chunk[1] + 2
+            max(start_chunk[0] - 1, 0) : min(end_chunk[0] + 2, len(self.chunks) - 1),
+            max(start_chunk[1] - 1, 0) : min(end_chunk[1] + 2, len(self.chunks) - 1),
         ] = 5
 
 
@@ -218,14 +221,24 @@ class Box:
                 )
                 chunk_size = CHUNK_SIZE * GRAIN_SIZE
                 win.blit(text_surface, ((i) * chunk_size, (j) * chunk_size))
+                width = (
+                    chunk_size
+                    if (i) * chunk_size + chunk_size < GRAIN_SIZE * GRID_WIDTH
+                    else -(i) * chunk_size + GRAIN_SIZE * GRID_WIDTH - 2
+                )
+                height = (
+                    chunk_size
+                    if (j) * chunk_size + chunk_size < GRAIN_SIZE * GRID_HEIGHT
+                    else -(j) * chunk_size + GRAIN_SIZE * GRID_HEIGHT - 2
+                )
                 pygame.draw.rect(
                     win,
                     RED,
                     (
                         (i) * chunk_size,
                         (j) * chunk_size,
-                        chunk_size,
-                        chunk_size,
+                        width,
+                        height,
                     ),
                     width=1,
                 )

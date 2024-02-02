@@ -2,6 +2,7 @@ import pygame
 
 from box import Box
 from consts import *
+from grains import GRAINS
 from inputs import InputHandler
 
 
@@ -13,7 +14,7 @@ def main():
 
     # setup grid
     box = Box()
-    box.place_grains((10, 50), (30, 74), "air")
+    box.place_grains((10, 50), (30, 74), GRAINS["air"])
     input_handler = InputHandler()
 
     # main loop -------------------------------->
