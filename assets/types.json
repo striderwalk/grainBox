@@ -1,50 +1,64 @@
 {
-  "sand": [
-    [255, 255, 0],
-    [
+  "sand": {
+    "can_move": true,
+    "state": "solid",
+    "colour": [255, 255, 0],
+    "movement": [
       [0, 0, 0.1],
       [0, 0, 1],
       [0, 0, 0.1]
     ],
-    2
-  ],
+    "density": 2
+  },
 
-  "water": [
-    [30, 144, 255],
-    [
+  "water": {
+    "can_move": true,
+
+    "state": "liquid",
+    "viscosity": 5,
+    "colour": [30, 144, 255],
+    "movement": [
       [0, 0.4, 0.5],
       [0, 0, 1],
       [0, 0.4, 0.5]
     ],
-    1
-  ],
+    "density": 1
+  },
 
-  "air": [
-    [0, 0, 0],
-
-    [
+  "air": {
+    "can_move": true,
+    "state": "gas",
+    "colour": [0, 0, 0],
+    "movement": [
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0]
     ],
-    0
-  ],
-  "stone": [
-    [150, 150, 150],
-    [
+    "density": 0
+  },
+
+  "stone": {
+    "can_move": false,
+    "state": "solid",
+    "colour": [150, 150, 150],
+    "movement": [
       [0, 0, 0],
       [0, 0, 0],
       [0, 0, 0]
     ],
-    3
-  ],
-  "steam": [
-    [200, 200, 200],
-    [
+    "density": 3
+  },
+  "steam": {
+    "can_move": true,
+    "state": "gas",
+    "viscosity": 5,
+
+    "colour": [200, 200, 200],
+    "movement": [
       [0.5, 0.4, 0],
       [0.5, 0, 0],
       [0.5, 0.4, 0]
     ],
-    0.5
-  ]
+    "density": 0.5
+  }
 }

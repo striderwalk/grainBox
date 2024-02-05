@@ -6,14 +6,15 @@ import numpy as np
 import pygame
 
 from consts import *
-from grains import GRAIN_DATA, GRAINS
+from movement_types import move_gas, move_liqud, move_solid
+from grains import GRAIN_DATA, GRAIN_TO_NAME, GRAINS
 
 
 class BoxSimulator:
     def __init__(self):
         self.grid = np.array(
             [
-                [GRAINS["water"] for _ in range(GRID_HEIGHT + 2)]
+                [GRAINS["air"] for _ in range(GRID_HEIGHT + 2)]
                 for _ in range(GRID_WIDTH + 2)
             ]
         )
@@ -55,7 +56,7 @@ class BoxSimulator:
                     for j in range(start_j, end_j):
                         pygame.draw.rect(
                             win,
-                            GRAIN_DATA[self.grid[i, j]][0],
+                            GRAIN_DATA[self.grid[i, j]]["colour"],
                             (
                                 (i - 1) * GRAIN_SIZE,
                                 (j - 1) * GRAIN_SIZE,
@@ -65,51 +66,34 @@ class BoxSimulator:
                         )
 
     def update_item(self, i, j, next_grid):
-        if self.grid[i, j] == GRAINS["air"]:
+        if (
+            self.grid[i, j] == GRAINS["air"]
+            or not GRAIN_DATA[self.grid[i, j]]["can_move"]
+        ):
             return
 
-        # this = grid[i, j]
         this_data = GRAIN_DATA[self.grid[i, j]]
+        if this_data["state"] == "gas":
+            func = move_gas
+        elif this_data["state"] == "liquid":
+            func = move_liqud
 
-        neighborhood = self.grid[i - 1 : i + 2, j - 1 : j + 2]
-        # if (neighborhood == this).all():
-        # return
-        moves = {}
-        for i_offset in range(0, 3):
-            for j_offset in range(0, 3):
-                if this_data[1][i_offset, j_offset] == 0:
-                    continue
+        elif this_data["state"] == "solid":
+            func = move_solid
+        else:
+            raise ValueError("Unknown state of matter")
 
-                if this_data[2] <= GRAIN_DATA[neighborhood[i_offset, j_offset]][2]:
-                    continue
-                if (
-                    this_data[2]
-                    <= GRAIN_DATA[next_grid[i + i_offset - 1, j + j_offset - 1]][2]
-                ):
-                    continue
-                moves[(i_offset - 1, j_offset - 1)] = this_data[1][i_offset, j_offset]
+        if not (result := func(i, j, self.grid, next_grid)):
+            return False
 
-        if moves:
-            max_value = max(moves.values())
-            max_keys = [key for key, value in moves.items() if value == max_value]
+        new_i, new_j = result
 
-            # i_offset, j_offset = max_keys[0]
-            i_offset, j_offset = random.choice(max_keys)
+        next_grid[new_i, new_j] = next_grid[i, j]
+        next_grid[i, j] = self.grid[new_i, new_j]
 
-            new_i = i + i_offset
-            new_j = j + j_offset
+        self.chunks[int((new_i / CHUNK_SIZE)), int((new_j / CHUNK_SIZE))] = 5
 
-            if new_i < 1 or new_i > len(self.grid) - 2:
-                return False
-            if new_j < 1 or new_j > len(self.grid[0]) - 2:
-                return False
-
-            next_grid[new_i, new_j] = next_grid[i, j]
-            next_grid[i, j] = self.grid[new_i, new_j]
-
-            self.chunks[int((new_i / CHUNK_SIZE)), int((new_j / CHUNK_SIZE))] = 5
-
-            return True
+        return True
 
     def update_grid(self):
         next_grid = deepcopy(self.grid)
@@ -169,7 +153,10 @@ class BoxSimulator:
 
         for i in range(start_pos[0], end_pos[0]):
             for j in range(start_pos[1], end_pos[1]):
-                if GRAIN_DATA[self.grid[i, j]][2] < GRAIN_DATA[grain][2]:
+                if (
+                    GRAIN_DATA[self.grid[i, j]]["density"]
+                    < GRAIN_DATA[grain]["density"]
+                ):
                     self.grid[i, j] = grain
 
         # Turn on the chunks
@@ -251,7 +238,7 @@ class Box:
                 )
 
     def place_grain(self, pos, grain):
-        self.simulatior.place_grains(pos, grain)
+        self.simulatior.place_grain(pos, grain)
 
     def place_grains(self, start_pos, end_pos, grain, **kwargs):
         self.simulatior.place_grains(start_pos, end_pos, grain, **kwargs)
