@@ -44,14 +44,18 @@ def move_liqud(i: int, j: int, grid, next_grid) -> tuple:
     if density > GRAIN_DATA[grid[i + 1, j + 1]]["density"]:
         if density > GRAIN_DATA[next_grid[i + 1, j + 1]]["density"]:
             if j + 1 < len(grid[0]) - 1:
+                if density > GRAIN_DATA[grid[i + 1, j]]["density"]:
+                    if density > GRAIN_DATA[next_grid[i + 1, j]]["density"]:
 
-                moves.append((i + 1, j + 1))
+                        moves.append((i + 1, j + 1))
 
     if density > GRAIN_DATA[grid[i - 1, j + 1]]["density"]:
         if density > GRAIN_DATA[next_grid[i - 1, j + 1]]["density"]:
             if j + 1 < len(grid[0]) - 1:
+                if density > GRAIN_DATA[grid[i - 1, j]]["density"]:
+                    if density > GRAIN_DATA[next_grid[i - 1, j]]["density"]:
 
-                moves.append((i - 1, j + 1))
+                        moves.append((i - 1, j + 1))
 
     if moves:
 
@@ -105,14 +109,16 @@ def move_gas(i: int, j: int, grid, next_grid) -> tuple:
     if density > GRAIN_DATA[grid[i + 1, j - 1]]["density"]:
         if density > GRAIN_DATA[next_grid[i + 1, j - 1]]["density"]:
             if j - 1 > 1:
-
-                moves.append((i + 1, j - 1))
+                if density > GRAIN_DATA[grid[i + 1, j]]["density"]:
+                    if density > GRAIN_DATA[next_grid[i + 1, j]]["density"]:
+                        moves.append((i + 1, j - 1))
 
     if density > GRAIN_DATA[grid[i - 1, j - 1]]["density"]:
         if density > GRAIN_DATA[next_grid[i - 1, j - 1]]["density"]:
             if j - 1 > 1:
-
-                moves.append((i - 1, j - 1))
+                if density > GRAIN_DATA[grid[i - 1, j]]["density"]:
+                    if density > GRAIN_DATA[next_grid[i - 1, j]]["density"]:
+                        moves.append((i - 1, j - 1))
 
     if moves:
 

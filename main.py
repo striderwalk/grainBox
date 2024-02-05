@@ -24,8 +24,8 @@ def main():
             box.place_grain((i, j), random.choice(list(GRAIN_DATA.keys())))
 
     # main loop -------------------------------->
-    for i in range(1000):
-        # while True:
+    # for i in range(1000):
+    while True:
         box.update(win)
         if input_handler.update(win, box):
             pygame.quit()
