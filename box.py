@@ -156,6 +156,7 @@ class BoxSimulator:
                 if (
                     GRAIN_DATA[self.grid[i, j]]["density"]
                     < GRAIN_DATA[grain]["density"]
+                    or self.grid[i, j] == GRAINS["air"]
                 ):
                     self.grid[i, j] = grain
 

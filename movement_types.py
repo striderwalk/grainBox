@@ -99,22 +99,22 @@ def move_gas(i: int, j: int, grid, next_grid) -> tuple:
     density = this_data["density"]
 
     # move down
-    if density > GRAIN_DATA[grid[i, j - 1]]["density"]:
-        if density > GRAIN_DATA[next_grid[i, j - 1]]["density"]:
+    if density < GRAIN_DATA[grid[i, j - 1]]["density"]:
+        if density < GRAIN_DATA[next_grid[i, j - 1]]["density"]:
             if j - 1 > 1:
                 return (i, j - 1)
 
     # move across
     moves = []
-    if density > GRAIN_DATA[grid[i + 1, j - 1]]["density"]:
-        if density > GRAIN_DATA[next_grid[i + 1, j - 1]]["density"]:
+    if density < GRAIN_DATA[grid[i + 1, j - 1]]["density"]:
+        if density < GRAIN_DATA[next_grid[i + 1, j - 1]]["density"]:
             if j - 1 > 1:
                 if density > GRAIN_DATA[grid[i + 1, j]]["density"]:
                     if density > GRAIN_DATA[next_grid[i + 1, j]]["density"]:
                         moves.append((i + 1, j - 1))
 
-    if density > GRAIN_DATA[grid[i - 1, j - 1]]["density"]:
-        if density > GRAIN_DATA[next_grid[i - 1, j - 1]]["density"]:
+    if density < GRAIN_DATA[grid[i - 1, j - 1]]["density"]:
+        if density < GRAIN_DATA[next_grid[i - 1, j - 1]]["density"]:
             if j - 1 > 1:
                 if density > GRAIN_DATA[grid[i - 1, j]]["density"]:
                     if density > GRAIN_DATA[next_grid[i - 1, j]]["density"]:
@@ -130,8 +130,8 @@ def move_gas(i: int, j: int, grid, next_grid) -> tuple:
         if i + offset > len(grid) - 2:
             right = False
         if right:
-            if density > GRAIN_DATA[grid[i + offset, j]]["density"]:
-                if density > GRAIN_DATA[next_grid[i + offset, j]]["density"]:
+            if density < GRAIN_DATA[grid[i + offset, j]]["density"]:
+                if density < GRAIN_DATA[next_grid[i + offset, j]]["density"]:
                     moves.append((i + offset, j))
                 else:
                     right = False
@@ -142,8 +142,8 @@ def move_gas(i: int, j: int, grid, next_grid) -> tuple:
         if i - offset < 2:
             left = False
         if left:
-            if density > GRAIN_DATA[grid[i - offset, j]]["density"]:
-                if density > GRAIN_DATA[next_grid[i - offset, j]]["density"]:
+            if density < GRAIN_DATA[grid[i - offset, j]]["density"]:
+                if density < GRAIN_DATA[next_grid[i - offset, j]]["density"]:
                     moves.append((i - offset, j))
                 else:
                     left = False
