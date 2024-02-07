@@ -7,7 +7,7 @@ import pygame
 
 from consts import *
 from movement_types import move_gas, move_liqud, move_solid
-from grains import GRAIN_DATA, GRAIN_TO_NAME, GRAINS
+from grains import GRAIN_DATA, GRAINS
 
 
 class BoxSimulator:
@@ -18,6 +18,7 @@ class BoxSimulator:
                 for _ in range(GRID_WIDTH + 2)
             ]
         )
+
         chucks_width = int(np.ceil(GRID_WIDTH / CHUNK_SIZE))
         chucks_height = int(np.ceil(GRID_HEIGHT / CHUNK_SIZE))
 
@@ -30,9 +31,9 @@ class BoxSimulator:
             for j in range(len(self.chunks[i])):
                 chunk = self.grid[
                     i * CHUNK_SIZE
-                    + 1 : min(i * CHUNK_SIZE + CHUNK_SIZE + 1, len(self.grid) - 1),
+                    + 1 : min(i * CHUNK_SIZE + CHUNK_SIZE + 1, GRID_WIDTH + 1),
                     j * CHUNK_SIZE
-                    + 1 : min(j * CHUNK_SIZE + CHUNK_SIZE + 1, len(self.grid[0]) - 1),
+                    + 1 : min(j * CHUNK_SIZE + CHUNK_SIZE + 1, GRID_HEIGHT + 1),
                 ]
 
                 if (chunk == GRAINS["air"]).all():
@@ -48,9 +49,9 @@ class BoxSimulator:
                     continue
 
                 start_i = max(1, i_chunk * CHUNK_SIZE - 1)
-                end_i = min(start_i + CHUNK_SIZE + 1, len(self.grid) - 1)
+                end_i = min(start_i + CHUNK_SIZE + 1, GRID_WIDTH + 1)
                 start_j = max(1, j_chunk * CHUNK_SIZE - 1)
-                end_j = min(start_j + CHUNK_SIZE + 1, len(self.grid[0]) - 1)
+                end_j = min(start_j + CHUNK_SIZE + 1, GRID_HEIGHT + 1)
 
                 for i in range(start_i, end_i):
                     for j in range(start_j, end_j):
@@ -107,10 +108,10 @@ class BoxSimulator:
 
                 # find real range chunk
                 start_i = max(1, i_chunk * CHUNK_SIZE - 1)
-                end_i = min(start_i + CHUNK_SIZE + 1, len(self.grid) - 1)
+                end_i = min(start_i + CHUNK_SIZE + 1, GRID_WIDTH + 1)
 
                 start_j = max(1, j_chunk * CHUNK_SIZE - 1)
-                end_j = min(start_j + CHUNK_SIZE + 1, len(self.grid[0]) - 1)
+                end_j = min(start_j + CHUNK_SIZE + 1, GRID_HEIGHT + 1)
 
                 # pick the direction to iterate
                 i_range = (
@@ -134,11 +135,10 @@ class BoxSimulator:
                 if not change and self.chunks[i_chunk, j_chunk] > 0:
                     self.chunks[i_chunk, j_chunk] -= 1
                 else:
-                    if i_chunk > 0:
-                        self.chunks[i_chunk - 1, j_chunk] = 5
-                    if i_chunk < len(self.chunks) - 1:
-
-                        self.chunks[i_chunk + 1, j_chunk] = 5
+                    self.chunks[
+                        max(0, i_chunk - 1) : min(i_chunk + 1, len(self.chunks) - 1),
+                        max(0, j_chunk - 1) : min(j_chunk + 1, len(self.chunks) - 1),
+                    ] = 5
 
         self.grid = next_grid
 
