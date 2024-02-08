@@ -1,3 +1,4 @@
+import numpy as np
 from grains import GRAINS
 
 
@@ -10,6 +11,18 @@ class MouseHandler:
         self.cursor_size = 1  # x by x square centered around the mouse cursor
 
         self.current_type = None
+        self.mouse_mode = False
+        self.last_position = ()
+
+    def button_down(self):
+        if pygame.mouse.get_pressed()[0]:
+            self.mouse_mode = 0
+        elif pygame.mouse.get_pressed()[2]:
+            self.mouse_mode = 2
+
+    def button_up(self):
+        self.last_position = ()
+        self.mouse_mode = False
 
     def scale_cursor(self, direction):
         self.cursor_size += 2 * direction
@@ -79,24 +92,36 @@ class MouseHandler:
 
     def update(self, win, box, current_type):
 
-        self.draw_mouse(win)
-        self.process_mouse(box, current_type)
+        if self.mouse_mode is not False:
+            position = self.get_position()
+            position = position[0] + 2, position[1] + 2
+            if self.last_position != position:
+                if self.last_position:
+                    self.process_mouse_movement(win, box, current_type)
 
-    def process_mouse(self, box, current_type):
+                self.last_position = position
+
+        self.draw_mouse(win)
+        # self.process_mouse(box, current_type)
+
+    def process_mouse_movement(self, win, box, current_type):
         x, y = self.get_position()
         x, y = x + 2, y + 2
 
-        if x < 0 or y < 0 or x > GRID_WIDTH or y > GRID_HEIGHT:
-            return
+        for i in np.linspace(self.last_position, (x, y)):
 
-        if pygame.mouse.get_pressed()[0]:
-            start, end = self._get_placement_cords(x, y)
+            lin_x = int(i[0])
+            lin_y = int(i[1])
 
-            box.place_grains(start, end, current_type, keep=True)
-        if pygame.mouse.get_pressed()[2]:
-            start, end = self._get_placement_cords(x, y)
+            if self.mouse_mode == 0:
+                start, end = self._get_placement_cords(lin_x, lin_y)
 
-            box.place_grains(start, end, current_type)
+                box.place_grains(start, end, current_type, keep=True)
+
+            if pygame.mouse.get_pressed()[2]:
+                start, end = self._get_placement_cords(lin_x, lin_y)
+
+                box.place_grains(start, end, current_type)
 
 
 class Selection:
@@ -146,6 +171,11 @@ class InputHandler:
                     box.check_chunks()
                 elif event.key == pygame.K_SPACE:
                     self.selection.next()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.mouse.button_down()
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self.mouse.button_up()
 
             elif event.type == pygame.MOUSEWHEEL:
                 self.mouse.scale_cursor(event.precise_y)
