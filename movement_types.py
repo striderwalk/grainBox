@@ -45,7 +45,7 @@ def move_solid(i: int, j: int, grid, next_grid) -> tuple:
         return random.choice(moves)
 
 
-def move_liqud(i: int, j: int, grid, next_grid) -> tuple:
+def move_liquid(i: int, j: int, grid, next_grid) -> tuple:
 
     this_data = GRAIN_DATA[grid[i, j]]
     density = this_data["density"]
@@ -77,7 +77,6 @@ def move_liqud(i: int, j: int, grid, next_grid) -> tuple:
 
         return random.choice(moves)
 
-    moves = []
     right, left = True, True
     for offset in range(1, this_data["viscosity"]):
         if i + offset > GRID_WIDTH:
@@ -132,7 +131,6 @@ def move_gas(i: int, j: int, grid, next_grid) -> tuple:
 
         return random.choice(moves)
 
-    moves = []
     right, left = True, True
     for offset in range(1, this_data["viscosity"]):
         if i + offset > GRID_WIDTH:

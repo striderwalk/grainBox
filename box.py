@@ -1,3 +1,4 @@
+import math
 import random
 from copy import deepcopy
 
@@ -6,8 +7,11 @@ import numpy as np
 import pygame
 
 from consts import *
-from movement_types import move_gas, move_liqud, move_solid
+from movement_types import move_gas, move_liquid, move_solid
 from grains import GRAIN_DATA, GRAINS
+
+
+movement_func_map = {"gas": move_gas, "liquid": move_liquid, "solid": move_solid}
 
 
 class BoxSimulator:
@@ -73,16 +77,7 @@ class BoxSimulator:
         ):
             return
 
-        this_data = GRAIN_DATA[self.grid[i, j]]
-        if this_data["state"] == "gas":
-            func = move_gas
-        elif this_data["state"] == "liquid":
-            func = move_liqud
-
-        elif this_data["state"] == "solid":
-            func = move_solid
-        else:
-            raise ValueError("Unknown state of matter")
+        func = movement_func_map[GRAIN_DATA[self.grid[i, j]]["state"]]
 
         if not (result := func(i, j, self.grid, next_grid)):
             return False
@@ -92,7 +87,10 @@ class BoxSimulator:
         next_grid[new_i, new_j] = next_grid[i, j]
         next_grid[i, j] = self.grid[new_i, new_j]
 
-        self.chunks[int((new_i / CHUNK_SIZE)), int((new_j / CHUNK_SIZE))] = 5
+        self.chunks[
+            math.floor(((new_i) / CHUNK_SIZE)),
+            math.floor(((new_j) / CHUNK_SIZE)),
+        ] = 5
 
         return True
 
@@ -136,9 +134,9 @@ class BoxSimulator:
                     self.chunks[i_chunk, j_chunk] -= 1
                 else:
                     self.chunks[
-                        max(0, i_chunk - 1) : min(i_chunk + 1, len(self.chunks) - 1),
+                        max(0, i_chunk - 1) : min(i_chunk + 1, len(self.chunks[0]) - 1),
                         max(0, j_chunk - 1) : min(j_chunk + 1, len(self.chunks) - 1),
-                    ] = 5
+                    ] = 1
 
         self.grid = next_grid
 
