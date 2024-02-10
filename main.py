@@ -26,8 +26,8 @@ def main():
     # box.place_grains((30, 75), (90, 90), GRAINS["steam"])
 
     # main loop -------------------------------->
-    # for i in range(1000):
-    while True:
+    for i in range(1000):
+        # while True:
         box.update(win)
         if input_handler.update(win, box):
             pygame.quit()
@@ -39,7 +39,7 @@ def main():
         clock.tick(FPS)
         cur_fps = clock.get_fps()
 
-        fps_text = f"FPS: {cur_fps:.2f}"  # {i}/1000"
+        fps_text = f"FPS: {cur_fps:.2f} {i}/1000"
         pygame.display.set_caption(fps_text)  # Set window title to display FPS
 
 

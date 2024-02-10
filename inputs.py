@@ -95,33 +95,34 @@ class MouseHandler:
         if self.mouse_mode is not False:
             position = self.get_position()
             position = position[0] + 2, position[1] + 2
-            if self.last_position != position:
-                if self.last_position:
-                    self.process_mouse_movement(win, box, current_type)
+            x, y = self.get_position()
+            x, y = min(x + 2, GRID_WIDTH), min(y + 2, GRID_HEIGHT)
 
-                self.last_position = position
+            self.process_mouse_movement(box, current_type, x, y)
+            self.last_position = position
 
         self.draw_mouse(win)
         # self.process_mouse(box, current_type)
 
-    def process_mouse_movement(self, win, box, current_type):
-        x, y = self.get_position()
-        x, y = x + 2, y + 2
+    def place_grains(self, box, current_type, x, y):
 
+        if self.mouse_mode == 0:
+            start, end = self._get_placement_cords(x, y)
+            box.place_grains(start, end, current_type, keep=True)
+
+        if pygame.mouse.get_pressed()[2]:
+            start, end = self._get_placement_cords(x, y)
+            box.place_grains(start, end, current_type)
+
+    def process_mouse_movement(self, box, current_type, x, y):
+        if not self.last_position:
+            self.place_grains(box, current_type, x, y)
+            return
         for i in np.linspace(self.last_position, (x, y)):
 
             lin_x = int(i[0])
             lin_y = int(i[1])
-
-            if self.mouse_mode == 0:
-                start, end = self._get_placement_cords(lin_x, lin_y)
-
-                box.place_grains(start, end, current_type, keep=True)
-
-            if pygame.mouse.get_pressed()[2]:
-                start, end = self._get_placement_cords(lin_x, lin_y)
-
-                box.place_grains(start, end, current_type)
+            self.place_grains(box, current_type, lin_x, lin_y)
 
 
 class Selection:
@@ -171,6 +172,8 @@ class InputHandler:
                     box.check_chunks()
                 elif event.key == pygame.K_SPACE:
                     self.selection.next()
+                elif event.key == pygame.K_LSHIFT:
+                    box.toggle_pause()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 self.mouse.button_down()
