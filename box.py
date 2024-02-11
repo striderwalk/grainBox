@@ -1,4 +1,5 @@
 import random
+import numpy as np
 import pygame
 
 from consts import *
@@ -12,8 +13,13 @@ class Box:
 
         self.simulatior = BoxSimulator()
         self.surface = pygame.Surface(
-            (GRID_WIDTH * GRAIN_SIZE, GRID_HEIGHT * GRAIN_SIZE), flags=pygame.SRCALPHA
+            (GRID_WIDTH + 1, GRID_HEIGHT + 1), flags=pygame.SRCALPHA
         )
+        print(pygame.surfarray.pixels2d(self.surface).shape)
+        self.surface_pixels = np.array(
+            [[(0, 0, 0) for _ in range(GRID_HEIGHT + 1)] for _ in range(GRID_WIDTH + 1)]
+        )
+        print(self.surface_pixels.shape)
 
         self.noise = pygame.Surface(
             ((GRID_WIDTH * GRAIN_SIZE, GRID_HEIGHT * GRAIN_SIZE))
@@ -54,16 +60,16 @@ class Box:
 
                 for i in range(start_i, end_i):
                     for j in range(start_j, end_j):
-                        pygame.draw.rect(
-                            win,
-                            GRAIN_DATA[self.simulatior.grid[i, j]]["colour"],
-                            (
-                                (i - 1) * GRAIN_SIZE,
-                                (j - 1) * GRAIN_SIZE,
-                                GRAIN_SIZE,
-                                GRAIN_SIZE,
-                            ),
-                        )
+                        self.surface_pixels[i, j] = GRAIN_DATA[
+                            self.simulatior.grid[i, j]
+                        ]["colour"]
+
+        pygame.surfarray.blit_array(self.surface, self.surface_pixels)
+        surface = pygame.transform.scale(
+            self.surface, (GRID_WIDTH * GRAIN_SIZE, GRID_HEIGHT * GRAIN_SIZE)
+        )
+
+        win.blit(surface, (0, 0))
 
     def draw_chunks(self, win):
         my_font = pygame.font.SysFont("Helvetica", 30)

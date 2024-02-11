@@ -142,18 +142,3 @@ class BoxSimulator:
             max(start_chunk[0] - 1, 0) : min(end_chunk[0] + 2, len(self.chunks)),
             max(start_chunk[1] - 1, 0) : min(end_chunk[1] + 2, len(self.chunks)),
         ] = 5
-
-
-def update_simulation(send_queue, recive_queue):
-    simulator = BoxSimulator()
-
-    while True:
-        if not recive_queue.empty():
-            message = recive_queue.get()
-            if message["type"] == "place_grains":
-                simulator.place_grains(message["data"])
-            elif message["type"] == "place_grain":
-                simulator.place_grain(message["data"])
-
-        simulator.update_grid()
-        send_queue.put((simulator.chunks, simulator.grid))
